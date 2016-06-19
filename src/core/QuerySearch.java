@@ -1,9 +1,10 @@
 package core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public abstract class QuerySearch {
+public abstract class QuerySearch implements Serializable {
 	protected String query;
 	protected ArrayList<SearchResult> results; 
 	private Date time;

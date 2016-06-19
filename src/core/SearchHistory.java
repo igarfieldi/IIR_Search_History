@@ -1,24 +1,64 @@
 package core;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class SearchHistory {
 	private ArrayList<QuerySearch> history;
-	
+	private String historyPath = "history.ser";
+
 	public SearchHistory() {
-		// TODO: load history from file or smth.
-		history = new ArrayList<QuerySearch>();
+		history = loadHistory(historyPath);
 	}
 	
 	public SearchHistory(String fileName) {
-		// TODO: load history from file or smth.
-		history = new ArrayList<QuerySearch>();
+		history = loadHistory(fileName);
 	}
-	
+
+	/**
+	 * Loads and deserializes history from file.
+	 * @param fileName File path to history
+	 * @return returns loaded history
+     */
+	private ArrayList<QuerySearch> loadHistory(String fileName){
+		history = new ArrayList<QuerySearch>();
+		try
+		{
+			FileInputStream fis = new FileInputStream(fileName);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			history = (ArrayList<QuerySearch>) ois.readObject();
+			ois.close();
+			fis.close();
+		}catch(IOException i)
+		{
+			i.printStackTrace();
+			return null;
+		}catch(ClassNotFoundException c)
+		{
+			System.out.println("History class not found");
+			c.printStackTrace();
+			return null;
+		}
+		return history;
+	}
+
+	/**
+	 * Saves history object to file.
+	 * @param fileName File path where history shall be saved.
+     */
+
 	public void saveHistory(String fileName) {
-		// TODO: store the search history in some way...
+		try {
+			FileOutputStream fos = new FileOutputStream(fileName);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(history);
+			oos.close();
+			fos.close();
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	/**
@@ -28,6 +68,7 @@ public class SearchHistory {
 	 */
 	public void addEntry(QuerySearch search) {
 		history.add(search);
+		this.saveHistory(historyPath);
 	}
 	
 	/**
@@ -78,6 +119,7 @@ public class SearchHistory {
 		
 		// Determine the indices of the history by iterating through the list
 		// and finding the first entries violating the date constraints
+		// Todo: Is this right? The for loop checks for beginIndex<0 and then you check for beginIndex<0 again? Not clear what you do here at the moment
 		for(int i = 0; (i < history.size()) && (beginIndex < 0) && (endIndex < 0); i++) {
 			if(beginIndex < 0) {
 				if(!history.get(i).getTimestamp().before(begin))

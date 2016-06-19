@@ -5,12 +5,11 @@
  */
 package core;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 
 /**
  *
@@ -248,20 +247,28 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     		System.out.println("Performed search for: '" + searchField.getText()
     				+ "' in history: " + historyButton.isSelected());
     		if(historyButton.isSelected()) {
-    			
-    			// TODO: search the history
-    			// For showcase purposes simply shows all queries
     			historyPanel.removeAll();
+                historyPanel.revalidate();
+                historyPanel.repaint();
     			
     			// TODO: apply filters
-    			for(QuerySearch search : history.getHistoryDateOrdered()) {
-        			historyPanel.add(new javax.swing.JLabel(search.getQuery()));
-    			}
+
+                String searchTerm = searchField.getText();
+                List<QuerySearch> historyElements = history.getHistoryDateOrdered();
+
+                for(QuerySearch search : historyElements){
+                    // Filters all history elements containing the search term (case insensitive)
+                    if (search.getQuery().toLowerCase().contains(searchTerm.toLowerCase())){
+                        historyPanel.add(new javax.swing.JLabel(search.getQuery()));
+                    }
+                }
     			
     			collapsiblePanel1.setState(false);
     		} else {
     			// Remove any previous search results / content
     			mainPanel.removeAll();
+                mainPanel.revalidate();
+                mainPanel.repaint();
     			
     			try {
     				// Utilize Bing to get the search results
@@ -302,7 +309,9 @@ public class SearchHistoryUI extends javax.swing.JFrame {
      */
     private void updateRecentSearches() {
     	recentSearchesPanel.removeAll();
-    	
+        recentSearchesPanel.revalidate();
+        recentSearchesPanel.repaint();
+
 		// Update the recent search bar
     	List<QuerySearch> recentSearches = history.getRecentSearches(5);
     	// Invert the result to have the latest result show at the top
@@ -316,6 +325,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 				public void actionPerformed(ActionEvent e) {
 					// TODO: open query up in history!
 					historyPanel.removeAll();
+                    historyPanel.revalidate();
+                    historyPanel.repaint();
 					
 					historyPanel.add(new javax.swing.JLabel(recent.getQuery()));
 					

@@ -1,20 +1,15 @@
 package core;
 
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Point;
+import javax.accessibility.AccessibleContext;
+import javax.accessibility.AccessibleText;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
-
-import javax.accessibility.AccessibleContext;
-import javax.accessibility.AccessibleText;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 /**
  * Label visualizing a search result.
@@ -37,6 +32,7 @@ public class ResultLabel extends JLabel {
 				+ "</a><p>" + result.getSummary() + "</p></html>", null, horAlignment);
 		
 		resultLink = new Link(result.getUrl().toString(), 2, result.getHeadline().length() + 1);
+		// DEBUG
 		System.out.println(result.getUrl() + " " + result.getHeadline().length() + " " + result.getUrl().toString().length());
 		
 		// Listen for clicks on the links in the label

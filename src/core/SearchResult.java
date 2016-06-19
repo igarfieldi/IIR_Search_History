@@ -1,9 +1,9 @@
 package core;
 
+import javax.json.JsonObject;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import javax.json.JsonObject;
 
 /**
  * Represents a single search result.
@@ -12,7 +12,7 @@ import javax.json.JsonObject;
  * @author Florian Bethe
  *
  */
-public class SearchResult {
+public class SearchResult implements Serializable {
 	private String query;
 	private URL url;
 	private String headline;
