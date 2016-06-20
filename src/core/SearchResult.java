@@ -13,6 +13,8 @@ import java.net.URL;
  *
  */
 public class SearchResult implements Serializable {
+	private static final long serialVersionUID = 483580055070483160L;
+	
 	private String query;
 	private URL url;
 	private String headline;
@@ -31,7 +33,7 @@ public class SearchResult implements Serializable {
 		this(query, new URL(obj.getString("Url")), obj.getString("Title"), obj.getString("Description"));
 
 		// DEBUG
-		System.out.println(obj.toString());
+		//System.out.println(obj.toString());
 	}
 	
 	public String getQuery() {

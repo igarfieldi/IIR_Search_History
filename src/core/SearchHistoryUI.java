@@ -7,7 +7,6 @@ package core;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -244,14 +243,16 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     private void performSearch() {//GEN-FIRST:event_searchFieldActionPerformed
     	if(!searchField.getText().isEmpty()) {
     		// DEBUG
-    		System.out.println("Performed search for: '" + searchField.getText()
-    				+ "' in history: " + historyButton.isSelected());
+    		//System.out.println("Performed search for: '" + searchField.getText() + "' in history: " + historyButton.isSelected());
     		if(historyButton.isSelected()) {
     			historyPanel.removeAll();
                 historyPanel.revalidate();
                 historyPanel.repaint();
     			
     			// TODO: apply filters
+                javax.swing.JLabel headLine = new javax.swing.JLabel(" " + searchField.getText());
+                headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+				historyPanel.add(headLine);
 
                 String searchTerm = searchField.getText();
                 List<QuerySearch> historyElements = history.getHistoryDateOrdered();
@@ -259,46 +260,20 @@ public class SearchHistoryUI extends javax.swing.JFrame {
                 for(QuerySearch search : historyElements){
                     // Filters all history elements containing the search term (case insensitive)
                     if (search.getQuery().toLowerCase().contains(searchTerm.toLowerCase())){
-                        historyPanel.add(new javax.swing.JLabel(search.getQuery()));
+                    	javax.swing.JButton queryBtn = new javax.swing.JButton(search.getQuery());
+                    	queryBtn.addActionListener(new java.awt.event.ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								searchEngine(((JButton)e.getSource()).getText());
+							}
+                    	});
+                        historyPanel.add(queryBtn);
                     }
                 }
     			
     			collapsiblePanel1.setState(false);
     		} else {
-    			// Remove any previous search results / content
-    			mainPanel.removeAll();
-                mainPanel.revalidate();
-                mainPanel.repaint();
-    			
-    			try {
-    				// Utilize Bing to get the search results
-    				BingSearch search = new BingSearch(searchField.getText());
-    				search.findQuery();
-    				
-
-					// Some fancy border stuff; simply adds some padding for the result labels
-					javax.swing.border.CompoundBorder innerLabelBorder = new javax.swing.border.CompoundBorder(
-							javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
-							javax.swing.BorderFactory.createLineBorder(java.awt.Color.DARK_GRAY, 1));
-					javax.swing.border.CompoundBorder outerLabelBorder = new javax.swing.border.CompoundBorder(
-							innerLabelBorder,
-							javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
-					
-    				// Add the individual results as links to the main panel
-    				for(SearchResult result : search.getResults()) {
-						ResultLabel currLink = new ResultLabel(result, SwingConstants.LEADING);
-						currLink.setBorder(outerLabelBorder);
-						mainPanel.add(currLink);
-					}
-					
-					history.addEntry(search);
-					this.updateRecentSearches();
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-    			mainPanel.validate();
-    			mainScrollPane.validate();
+    			searchEngine(searchField.getText());
     		}
     	}
     }//GEN-LAST:event_searchFieldActionPerformed
@@ -314,10 +289,10 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 
 		// Update the recent search bar
     	List<QuerySearch> recentSearches = history.getRecentSearches(5);
-    	// Invert the result to have the latest result show at the top
-    	Collections.reverse(recentSearches);
     	
-		for(QuerySearch recent : recentSearches) {
+    	// Traverse the recent searches in reverse order
+		for(int i = recentSearches.size() - 1; i >= 0; i--) {
+			QuerySearch recent = recentSearches.get(i);
 			javax.swing.JButton currQueryButton = new javax.swing.JButton(recent.getQuery());
 			currQueryButton.addActionListener(new java.awt.event.ActionListener() {
 				
@@ -328,10 +303,12 @@ public class SearchHistoryUI extends javax.swing.JFrame {
                     historyPanel.revalidate();
                     historyPanel.repaint();
 					
-					historyPanel.add(new javax.swing.JLabel(recent.getQuery()));
+                    javax.swing.JLabel headLine = new javax.swing.JLabel(" " + recent.getQuery());
+                    headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+					historyPanel.add(headLine);
 					
 					for(SearchResult result : recent.getResults()) {
-						historyPanel.add(new javax.swing.JLabel(result.getHeadline()));
+						historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
 					}
 					
 					outerHistoryPanel.validate();
@@ -344,6 +321,44 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		}
 		
 		sidebarPanel.validate();
+    }
+    
+    private void searchEngine(String query) {
+    	// Remove any previous search results / content
+		mainPanel.removeAll();
+        mainPanel.revalidate();
+        mainPanel.repaint();
+		
+		try {
+			// Utilize Bing to get the search results
+			BingSearch search = new BingSearch(query);
+			search.findQuery();
+			
+
+			// Some fancy border stuff; simply adds some padding for the result labels
+			javax.swing.border.CompoundBorder innerLabelBorder = new javax.swing.border.CompoundBorder(
+					javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
+					javax.swing.BorderFactory.createLineBorder(java.awt.Color.DARK_GRAY, 1));
+			javax.swing.border.CompoundBorder outerLabelBorder = new javax.swing.border.CompoundBorder(
+					innerLabelBorder,
+					javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			
+			// Add the individual results as links to the main panel
+			for(SearchResult result : search.getResults()) {
+				ResultLabel currLink = new ResultLabel(result, SwingConstants.LEADING);
+				currLink.setBorder(outerLabelBorder);
+				mainPanel.add(currLink);
+			}
+			
+			history.addEntry(search);
+			this.updateRecentSearches();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		mainPanel.validate();
+		mainScrollPane.validate();
     }
     
     /**

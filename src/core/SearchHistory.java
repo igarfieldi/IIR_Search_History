@@ -7,13 +7,15 @@ import java.util.List;
 
 public class SearchHistory {
 	private ArrayList<QuerySearch> history;
-	private String historyPath = "history.ser";
+	private String historyPath;
+	private static final String DEFAULT_HISTORY_PATH = "history.ser";
 
 	public SearchHistory() {
-		history = loadHistory(historyPath);
+		this(DEFAULT_HISTORY_PATH);
 	}
 	
 	public SearchHistory(String fileName) {
+		historyPath = fileName;
 		history = loadHistory(fileName);
 	}
 
@@ -22,26 +24,35 @@ public class SearchHistory {
 	 * @param fileName File path to history
 	 * @return returns loaded history
      */
+	@SuppressWarnings("unchecked")
 	private ArrayList<QuerySearch> loadHistory(String fileName){
-		history = new ArrayList<QuerySearch>();
-		try
-		{
-			FileInputStream fis = new FileInputStream(fileName);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			history = (ArrayList<QuerySearch>) ois.readObject();
-			ois.close();
-			fis.close();
-		}catch(IOException i)
-		{
-			i.printStackTrace();
-			return null;
-		}catch(ClassNotFoundException c)
-		{
-			System.out.println("History class not found");
-			c.printStackTrace();
+		File historyFile = new File(fileName);
+		
+		// Check if the file exists and if not, create it
+		try {
+			if(!historyFile.exists()) {
+				historyFile.createNewFile();
+				return new ArrayList<QuerySearch>();
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
 			return null;
 		}
-		return history;
+		
+		// Try-with-resources for reading an existing history file
+		try(
+				final FileInputStream fis = new FileInputStream(fileName);
+				final ObjectInputStream ois = new ObjectInputStream(fis)
+		) {
+			
+			return (ArrayList<QuerySearch>) ois.readObject();
+		} catch(IOException i) {
+			i.printStackTrace();
+		} catch(ClassNotFoundException c) {
+			System.err.println("History class not found");
+			c.printStackTrace();
+		}
+		return null;
 	}
 
 	/**

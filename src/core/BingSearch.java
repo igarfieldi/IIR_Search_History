@@ -13,7 +13,8 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 public class BingSearch extends QuerySearch {
-
+	private static final long serialVersionUID = -7330201968531730502L;
+	
 	private final static String bingAccountKey = "auUSumxaZySXi95rzYxhOSUpFFHG2Zj4Gx1PkphXRlw=";
 	private final static String bingUrlPattern = "https://api.datamarket.azure.com/Bing/Search/Web?Query=%%27%s%%27&$format=json&$top=%s";
 
@@ -28,7 +29,6 @@ public class BingSearch extends QuerySearch {
         
         // Assemble the URL with query, max. results etc.
         URL requestUrl = new URL(String.format(bingUrlPattern, URLEncoder.encode(query, "UTF-8"), Integer.toString(this.getMaxResults())));
-        System.out.println(requestUrl.toString());
         
         // Connect to the bing server
         URLConnection bingConnection = requestUrl.openConnection();
@@ -49,7 +49,7 @@ public class BingSearch extends QuerySearch {
         	}
         	
         	// DEBUG
-        	System.out.println(jsonData.toString());
+        	//System.out.println(jsonData.toString());
         }
 	}
 }

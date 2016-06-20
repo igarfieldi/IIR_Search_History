@@ -28,12 +28,23 @@ public class ResultLabel extends JLabel {
 	protected Link resultLink;
 	
 	public ResultLabel(SearchResult result, int horAlignment) {
-		super("<html>&nbsp;<a href=\"" + result.getUrl().toString() + "\">" + result.getHeadline()
-				+ "</a><p>" + result.getSummary() + "</p></html>", null, horAlignment);
+		this(result, horAlignment, true);
+	}
+	
+	public ResultLabel(SearchResult result, int horAlignment, boolean expressiveLabel) {
+		super("", null, horAlignment);
+		
+		if(expressiveLabel) {
+			this.setText("<html>&nbsp;<a href=\"" + result.getUrl().toString() + "\">" + result.getHeadline()
+			+ "</a><p>" + result.getSummary() + "</p></html>");
+		} else {
+			this.setText("<html>&nbsp;<a href=\"" + result.getUrl().toString() + "\">" + result.getHeadline()
+			+ "</a></html>");
+		}
 		
 		resultLink = new Link(result.getUrl().toString(), 2, result.getHeadline().length() + 1);
 		// DEBUG
-		System.out.println(result.getUrl() + " " + result.getHeadline().length() + " " + result.getUrl().toString().length());
+		//System.out.println(result.getUrl() + " " + result.getHeadline().length() + " " + result.getUrl().toString().length());
 		
 		// Listen for clicks on the links in the label
 		this.addMouseListener(new MouseAdapter() {
@@ -113,7 +124,9 @@ public class ResultLabel extends JLabel {
 				int position = label.getIndexAtPoint(point);
 				
 				if(resultLink.isInside(position)) {
+					// DEBUG
 					//System.out.println(link.url + " " + link.start + " " + link.end + " " + point.getX() + " " + point.getY() + " " + position);
+					
 					return true;
 				}
 			}

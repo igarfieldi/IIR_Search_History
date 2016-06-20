@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public abstract class QuerySearch implements Serializable {
+	private static final long serialVersionUID = -8022814148564187528L;
+	
 	protected String query;
 	protected ArrayList<SearchResult> results; 
 	private Date time;
