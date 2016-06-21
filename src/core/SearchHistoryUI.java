@@ -7,6 +7,8 @@ package core;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -215,18 +217,16 @@ public class SearchHistoryUI extends javax.swing.JFrame {
         outerHistoryPanel = new javax.swing.JPanel();
         outerHistoryPanel.setLayout(new java.awt.BorderLayout());
         
-        historyScrollPane = new javax.swing.JScrollPane();
+        historyPanel = new javax.swing.JPanel();
+        historyPanel.setLayout(new javax.swing.BoxLayout(historyPanel, javax.swing.BoxLayout.Y_AXIS));
+        
+        historyScrollPane = new javax.swing.JScrollPane(historyPanel);
         historyScrollPane.setBorder(null);
         historyScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         outerHistoryPanel.add(historyScrollPane, java.awt.BorderLayout.CENTER);
-        
-        historyPanel = new javax.swing.JPanel();
-        historyPanel.add(new javax.swing.JLabel("Results"));
-        historyPanel.setLayout(new javax.swing.BoxLayout(historyPanel, javax.swing.BoxLayout.Y_AXIS));
-        historyScrollPane.add(historyPanel);
 
         jPanel5.add(optionsPanel, java.awt.BorderLayout.WEST);
-        jPanel5.add(historyPanel, java.awt.BorderLayout.CENTER);
+        jPanel5.add(outerHistoryPanel, java.awt.BorderLayout.CENTER);
         collapsiblePanel1.setContent(jPanel5);
         jPanel3.add(collapsiblePanel1, java.awt.BorderLayout.SOUTH);
 
@@ -245,33 +245,7 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     		// DEBUG
     		//System.out.println("Performed search for: '" + searchField.getText() + "' in history: " + historyButton.isSelected());
     		if(historyButton.isSelected()) {
-    			historyPanel.removeAll();
-                historyPanel.revalidate();
-                historyPanel.repaint();
-    			
-    			// TODO: apply filters
-                javax.swing.JLabel headLine = new javax.swing.JLabel(" " + searchField.getText());
-                headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
-				historyPanel.add(headLine);
-
-                String searchTerm = searchField.getText();
-                List<QuerySearch> historyElements = history.getHistoryDateOrdered();
-
-                for(QuerySearch search : historyElements){
-                    // Filters all history elements containing the search term (case insensitive)
-                    if (search.getQuery().toLowerCase().contains(searchTerm.toLowerCase())){
-                    	javax.swing.JButton queryBtn = new javax.swing.JButton(search.getQuery());
-                    	queryBtn.addActionListener(new java.awt.event.ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								searchEngine(((JButton)e.getSource()).getText());
-							}
-                    	});
-                        historyPanel.add(queryBtn);
-                    }
-                }
-    			
-    			collapsiblePanel1.setState(false);
+    			searchHistory(searchField.getText());
     		} else {
     			searchEngine(searchField.getText());
     		}
@@ -359,6 +333,55 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		
 		mainPanel.validate();
 		mainScrollPane.validate();
+    }
+    
+    private void searchHistory(String query) {
+    	historyPanel.removeAll();
+        historyPanel.revalidate();
+        historyPanel.repaint();
+		
+		// TODO: apply filters
+        javax.swing.JLabel headLine = new javax.swing.JLabel(" " + searchField.getText());
+        headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+		historyPanel.add(headLine);
+
+        String searchTerm = searchField.getText();
+        List<QuerySearch> historyElements = history.getHistoryDateOrdered();
+
+        // TODO: remove duplicates?
+        for(QuerySearch search : historyElements){
+            // Filters all history elements containing the search term (case insensitive)
+            if(containsWords(searchTerm, search.getQuery())) {
+            	javax.swing.JButton queryBtn = new javax.swing.JButton(search.getQuery());
+            	queryBtn.addActionListener(new java.awt.event.ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						searchEngine(((JButton)e.getSource()).getText());
+					}
+            	});
+                historyPanel.add(queryBtn);
+            }
+            
+            for(SearchResult result : search.getResults()) {
+            	if(containsWords(searchTerm, result.getHeadline())){
+            		historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
+            	}
+            }
+        }
+		
+		collapsiblePanel1.setState(false);
+		collapsiblePanel1.validate();
+		collapsiblePanel1.repaint();
+    }
+    
+    private boolean containsWords(String query, String text) {
+    	List<String> queryWords = Arrays.asList(query.toLowerCase().split(" "));
+    	List<String> textWords = Arrays.asList(text.toLowerCase().split(" "));
+    	for(String word : queryWords) {
+    		if(!textWords.contains(word))
+    			return false;
+    	}
+    	return true;
     }
     
     /**

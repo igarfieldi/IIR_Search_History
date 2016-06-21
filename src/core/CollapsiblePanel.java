@@ -6,10 +6,12 @@
 package core;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 /**
@@ -71,6 +73,18 @@ public class CollapsiblePanel extends JPanel {
         this.content = content;
         this.add(this.content, BorderLayout.CENTER);
         this.content.setVisible(!isCollapsed);
+    }
+    
+    public Dimension getMaximumSize() {
+    	if(SwingUtilities.getRoot(this) == null)
+    		return super.getMaximumSize();
+    	return new Dimension((int)super.getMaximumSize().getWidth(), SwingUtilities.getRoot(this).getHeight() / 2);
+    }
+    
+    public Dimension getPreferredSize() {
+    	if(SwingUtilities.getRoot(this) == null)
+    		return super.getPreferredSize();
+    	return new Dimension((int)super.getPreferredSize().getWidth(), Math.min(SwingUtilities.getRoot(this).getHeight() / 2, (int)super.getPreferredSize().getHeight()));
     }
     
     /**
