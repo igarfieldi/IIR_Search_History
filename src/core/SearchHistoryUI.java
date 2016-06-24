@@ -6,8 +6,9 @@
 package core;
 
 import javax.swing.*;
+
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
      */
     public SearchHistoryUI() {
     	history = new SearchHistory();
+    	lastQuery = null;
+    	lastRecentSearch = null;
         initComponents();
         this.updateRecentSearches();
     }
@@ -212,7 +215,21 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 
         optionsPanel = new javax.swing.JPanel();
         optionsPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 0, 1, java.awt.Color.BLACK));
-        optionsPanel.add(new javax.swing.JLabel("Options"));
+        checkVisitedOnly = new javax.swing.JCheckBox("Show visited pages only");
+        checkVisitedOnly.setSelected(true);
+        checkVisitedOnly.addActionListener(new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Check which was the last history action performed by the user and use that
+				// to update the view of the history
+				if(lastQuery != null) {
+					searchHistory(lastQuery);
+				} else if(lastRecentSearch != null) {
+					displayRecentSearch(lastRecentSearch);
+				}
+			}
+        });
+        optionsPanel.add(checkVisitedOnly);
 
         outerHistoryPanel = new javax.swing.JPanel();
         outerHistoryPanel.setLayout(new java.awt.BorderLayout());
@@ -245,7 +262,9 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     		// DEBUG
     		//System.out.println("Performed search for: '" + searchField.getText() + "' in history: " + historyButton.isSelected());
     		if(historyButton.isSelected()) {
-    			searchHistory(searchField.getText());
+    			lastQuery = searchField.getText();
+    			lastRecentSearch = null;
+    			searchHistory(lastQuery);
     		} else {
     			searchEngine(searchField.getText());
     		}
@@ -272,21 +291,9 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// TODO: open query up in history!
-					historyPanel.removeAll();
-                    historyPanel.revalidate();
-                    historyPanel.repaint();
-					
-                    javax.swing.JLabel headLine = new javax.swing.JLabel(" " + recent.getQuery());
-                    headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
-					historyPanel.add(headLine);
-					
-					for(SearchResult result : recent.getResults()) {
-						historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
-					}
-					
-					outerHistoryPanel.validate();
-					collapsiblePanel1.setState(false);
+					lastRecentSearch = recent;
+					lastQuery = null;
+					displayRecentSearch(recent);
 				}
 				
 			});
@@ -295,6 +302,25 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		}
 		
 		sidebarPanel.validate();
+    }
+    
+    private void displayRecentSearch(QuerySearch recent) {
+    	historyPanel.removeAll();
+        historyPanel.revalidate();
+        historyPanel.repaint();
+		
+        javax.swing.JLabel headLine = new javax.swing.JLabel(" " + recent.getQuery());
+        headLine.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+		historyPanel.add(headLine);
+		
+		for(SearchResult result : recent.getResults()) {
+			if((result.getClickCounter() > 0) || !checkVisitedOnly.isSelected())
+				historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
+		}
+		
+		collapsiblePanel1.setState(false);
+		collapsiblePanel1.revalidate();
+		collapsiblePanel1.repaint();
     }
     
     private void searchEngine(String query) {
@@ -364,7 +390,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
             
             for(SearchResult result : search.getResults()) {
             	if(containsWords(searchTerm, result.getHeadline())){
-            		historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
+            		if((result.getClickCounter() > 0) || !checkVisitedOnly.isSelected())
+            			historyPanel.add(new ResultLabel(result, SwingConstants.LEADING, false));
             	}
             }
         }
@@ -416,6 +443,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 
     
     private SearchHistory history;
+    private String lastQuery;
+    private QuerySearch lastRecentSearch;
     
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel optionsPanel;
@@ -425,6 +454,7 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     private javax.swing.JPanel mainPanel;
     private javax.swing.JScrollPane historyScrollPane;
     private javax.swing.JScrollPane mainScrollPane;
+    private javax.swing.JCheckBox checkVisitedOnly;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup searchButtonGroup;
     private core.CollapsiblePanel collapsiblePanel1;

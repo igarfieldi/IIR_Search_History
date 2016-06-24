@@ -53,6 +53,7 @@ public class ResultLabel extends JLabel {
 				if(ResultLabel.this.isOverLink(evt.getPoint())) {
 					try {
 						Desktop.getDesktop().browse(new URI(resultLink.url));
+						result.incrementClickCounter();
 					} catch (IOException | URISyntaxException e) {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null,
