@@ -15,8 +15,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 /**
- *
- * @author Florian Bethe
+ * Custom extension of JPanel enabling a collapsible panel.
+ * Contains a content panel and a button to collapse and expand the content panel.
+ * @author Florian Bethe, Tino Liebusch
  */
 public class CollapsiblePanel extends JPanel {
 	private static final long serialVersionUID = 5973469035724403418L;
@@ -25,10 +26,21 @@ public class CollapsiblePanel extends JPanel {
     private JComponent content;
     private boolean isCollapsed;
     
+    /**
+     * Default constructor.
+     * Creates an empty content panel and sets the header location at NORTH.
+     */
     public CollapsiblePanel() {
         this(new JPanel(), BorderLayout.NORTH);
     }
     
+    /**
+     * Constructor.
+     * Stores the given content panel and creates the header at the specified location (default
+     * NORTH).
+     * @param content Panel used as content panel
+     * @param headerLocation Location for the header button (from {@link java.awt.BorderLayout BorderLayout})
+     */
     public CollapsiblePanel(JPanel content, String headerLocation) {
         switch(headerLocation) {
             case BorderLayout.EAST:
@@ -55,6 +67,7 @@ public class CollapsiblePanel extends JPanel {
             
         });
         
+        // Initial state is collapsed
         this.content = content;
         this.content.setVisible(false);
         this.isCollapsed = true;
@@ -66,7 +79,7 @@ public class CollapsiblePanel extends JPanel {
     
     /**
      * Sets the content panel.
-     * @param content New content panel.
+     * @param content New content panel
      */
     public void setContent(JComponent content) {
         this.remove(this.content);
@@ -76,12 +89,14 @@ public class CollapsiblePanel extends JPanel {
     }
     
     public Dimension getMaximumSize() {
+    	// The max. size of this component is half the height of the whole frame (otherwise it'd take as much space as needed)
     	if(SwingUtilities.getRoot(this) == null)
     		return super.getMaximumSize();
     	return new Dimension((int)super.getMaximumSize().getWidth(), SwingUtilities.getRoot(this).getHeight() / 2);
     }
     
     public Dimension getPreferredSize() {
+    	// The max. size of this component is half the height of the whole frame (otherwise it'd take as much space as needed)
     	if(SwingUtilities.getRoot(this) == null)
     		return super.getPreferredSize();
     	return new Dimension((int)super.getPreferredSize().getWidth(), Math.min(SwingUtilities.getRoot(this).getHeight() / 2, (int)super.getPreferredSize().getHeight()));
@@ -90,7 +105,7 @@ public class CollapsiblePanel extends JPanel {
     /**
      * Moves the header button to a new border.
      * The location has to be either NORTH, SOUTH, EAST or WEST of the 
-     * BorderLayout class, otherwise the location will not be changed.
+     * {@link java.awt.BorderLayout BorderLayout} class, otherwise the location will not be changed.
      * @param headerLocation New header location
      */
     public void setHeaderLocation(String headerLocation) {

@@ -9,28 +9,38 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.regex.Pattern;
 
 /**
  * Label visualizing a search result.
- * The headline is a clickable link opening the result in the browser.
- * @author Florian Bethe
+ * The headline is a clickable hyperlink opening the result in the browser.
+ * @author Florian Bethe, Tino Liebusch
  *
  */
 public class ResultLabel extends JLabel {
 
 	private static final long serialVersionUID = 4221537970955575561L;
 	
-	protected final static Pattern linkPattern = Pattern.compile("<a href=\"(.*?)\">(.*?)</a>");
-	protected final static Pattern linkOpenPattern = Pattern.compile("<a href=\"(.*?)\">");
-	protected final static Pattern linkClosePattern = Pattern.compile("</a>");
-	
 	protected Link resultLink;
 	
+	/**
+	 * Constructor.
+	 * Creates new label for the given result with the given alignment (from {@link javax.swing.SwingConstants SwingConstants})
+	 * and displays the result summary as well.
+	 * @param result Search result
+	 * @param horAlignment Alignment of label text
+	 */
 	public ResultLabel(SearchResult result, int horAlignment) {
 		this(result, horAlignment, true);
 	}
 	
+	/**
+	 * Constructor.
+	 * Creates new label for the given result with the given alignment (from {@link javax.swing.SwingConstants SwingConstants}).
+	 * If expressiveLabel is false, the result summary will be omitted.
+	 * @param result Search result
+	 * @param horAlignment Alignment of label text
+	 * @param expressiveLabel Off-switch for displaying summary
+	 */
 	public ResultLabel(SearchResult result, int horAlignment, boolean expressiveLabel) {
 		super("", null, horAlignment);
 		
@@ -43,8 +53,6 @@ public class ResultLabel extends JLabel {
 		}
 		
 		resultLink = new Link(result.getUrl().toString(), 2, result.getHeadline().length() + 1);
-		// DEBUG
-		//System.out.println(result.getUrl() + " " + result.getHeadline().length() + " " + result.getUrl().toString().length());
 		
 		// Listen for clicks on the links in the label
 		this.addMouseListener(new MouseAdapter() {
@@ -90,25 +98,14 @@ public class ResultLabel extends JLabel {
 	@Override
 	public Dimension getPreferredSize() {
 		// TODO: how to incorporate scrolling bar?
-		//System.out.println(this.getParent().getSize());
 		Dimension pref = super.getPreferredSize();
 		return new Dimension(this.getParent().getWidth(), pref.height);
 	}
 	
-	@Override
-	public Dimension getMinimumSize() {
-		return this.getPreferredSize();
-	}
-	
-	@Override
-	public Dimension getMaximumSize() {
-		return this.getPreferredSize();
-	}
-	
 	/**
-	 * Returns the link corresponding to a mouse location, if existing.
+	 * Checks whether a given point (on screen/label) is over the link.
 	 * @param point Mouse point
-	 * @return Link at the location
+	 * @return Is point over link
 	 */
 	protected boolean isOverLink(Point point) {
 		// TODO: border is also counted as link...
@@ -125,9 +122,6 @@ public class ResultLabel extends JLabel {
 				int position = label.getIndexAtPoint(point);
 				
 				if(resultLink.isInside(position)) {
-					// DEBUG
-					//System.out.println(link.url + " " + link.start + " " + link.end + " " + point.getX() + " " + point.getY() + " " + position);
-					
 					return true;
 				}
 			}
@@ -138,7 +132,7 @@ public class ResultLabel extends JLabel {
 	
 	/**
 	 * Represents a link in the label.
-	 * F**k encapsulation, this is basically a C struct.
+	 * F*** encapsulation, this is basically a C struct.
 	 * @author Florian Bethe
 	 *
 	 */
@@ -153,6 +147,12 @@ public class ResultLabel extends JLabel {
 			this.end = end;
 		}
 		
+		/**
+		 * Checks whether the given position is within the start-end bounds.
+		 * Saves some writing.
+		 * @param position Position to be checked
+		 * @return Is position within start-end bounds
+		 */
 		public boolean isInside(int position) {
 			return (position >= start) && (position <= end);
 		}

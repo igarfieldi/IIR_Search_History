@@ -5,27 +5,47 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Stores the search history of the user.
+ * @author Florian Bethe, Tino Liebusch
+ */
 public class SearchHistory {
 	private ArrayList<QuerySearch> history;
 	private String historyPath;
 	private static final String DEFAULT_HISTORY_PATH = "history.ser";
 
+	/**
+	 * Default constructor.
+	 * Sets the history path to the default one.
+	 */
 	public SearchHistory() {
 		this(DEFAULT_HISTORY_PATH);
 	}
 	
+	/**
+	 * Constructor.
+	 * Uses (or creates) history at the provided location.
+	 * @param fileName History file location
+	 */
 	public SearchHistory(String fileName) {
 		historyPath = fileName;
-		history = loadHistory(fileName);
+		history = loadHistory();
 	}
 
+	/**
+	 * Loads the history at the current history location (if present).
+	 * @return List of {@link QuerySearch QuerySearch} representing the history
+	 */
+	public ArrayList<QuerySearch> loadHistory() {
+		return this.loadHistory(historyPath);
+	}
 	/**
 	 * Loads and deserializes history from file.
 	 * @param fileName File path to history
 	 * @return returns loaded history
      */
 	@SuppressWarnings("unchecked")
-	private ArrayList<QuerySearch> loadHistory(String fileName){
+	public ArrayList<QuerySearch> loadHistory(String fileName){
 		File historyFile = new File(fileName);
 		
 		// Check if the file exists and if not, create it
@@ -56,10 +76,16 @@ public class SearchHistory {
 	}
 
 	/**
+	 * Saves history object to file at current history file location.
+     */
+	public void saveHistory() {
+		this.saveHistory(historyPath);
+	}
+	
+	/**
 	 * Saves history object to file.
 	 * @param fileName File path where history shall be saved.
      */
-
 	public void saveHistory(String fileName) {
 		try {
 			FileOutputStream fos = new FileOutputStream(fileName);

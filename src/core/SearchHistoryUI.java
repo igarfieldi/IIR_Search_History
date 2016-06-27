@@ -7,22 +7,23 @@ package core;
 
 import javax.swing.*;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.List;
 
 
 /**
- *
- * @author Florian Bethe
+ * Main class of the application.
+ * Stores the UI component and some of the interaction-bound application logic.
+ * The {@link #initComponents() initComponents}-method was largely created by Netbeans GUI builder.
+ * @author Florian Bethe, Tino Liebusch
  */
 public class SearchHistoryUI extends javax.swing.JFrame {
 	
 	private static final long serialVersionUID = 2900840823572839865L;
 	
 	/**
-     * Creates new form SearchHistoryUI
+     * Creates new form SearchHistoryUI.
      */
     public SearchHistoryUI() {
     	history = new SearchHistory();
@@ -30,6 +31,16 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     	lastRecentSearch = null;
         initComponents();
         this.updateRecentSearches();
+
+        // Add shutdown hook to save the history after application exit
+        Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+		    @Override
+		    public void run()
+		    {
+		    	history.saveHistory();
+		    }
+		});
     }
 
     /**
@@ -304,6 +315,10 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		sidebarPanel.validate();
     }
     
+    /**
+     * Displays the search results of a {@link QuerySearch QuerySearch} in the history panel.
+     * @param recent QuerySearch to be used
+     */
     private void displayRecentSearch(QuerySearch recent) {
     	historyPanel.removeAll();
         historyPanel.revalidate();
@@ -323,6 +338,11 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		collapsiblePanel1.repaint();
     }
     
+    /**
+     * Creates a new {@link BingSearch BingSearch} to search for the provided query.
+     * Also updates the search history and displays the search results in the main panel.
+     * @param query Search query
+     */
     private void searchEngine(String query) {
     	// Remove any previous search results / content
 		mainPanel.removeAll();
@@ -361,6 +381,12 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		mainScrollPane.validate();
     }
     
+    /**
+     * Searches the history for the given query.
+     * Here a simple binary search is done; if the query or result headline contains all the words
+     * in the query regardless of order, it is displayed in the history panel.
+     * @param query
+     */
     private void searchHistory(String query) {
     	historyPanel.removeAll();
         historyPanel.revalidate();
@@ -401,6 +427,12 @@ public class SearchHistoryUI extends javax.swing.JFrame {
 		collapsiblePanel1.repaint();
     }
     
+    /**
+     * Helper method checking whether a text contains all the words in a query.
+     * @param query Search query
+     * @param text Text to be searched
+     * @return Does the text contain all the query words
+     */
     private boolean containsWords(String query, String text) {
     	List<String> queryWords = Arrays.asList(query.toLowerCase().split(" "));
     	List<String> textWords = Arrays.asList(text.toLowerCase().split(" "));
@@ -412,7 +444,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
     }
     
     /**
-     * @param args the command line arguments
+     * Main method.
+     * @param args The command line arguments
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -432,6 +465,8 @@ public class SearchHistoryUI extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(SearchHistoryUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        
+        // Add a shutdown hook to save the history in case of application exit
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
